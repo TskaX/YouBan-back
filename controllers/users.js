@@ -184,9 +184,9 @@ export const addAppointment = async (req, res) => {
   try {
     const data = await appointments.find()
     const data2 = data.filter(el => el.date === req.body.date && el.time === req.body.time && el.p_id.toString() === req.body.p_id.toString())
-    if(data2.length > 0) {
+    if (data2.length > 0) {
       const result = '預約時間重複'
-      res.status(200).json({success: true, message: '預約時間重複', result})
+      res.status(200).json({ success: true, message: '預約時間重複', result })
     } else {
       await appointments.create({
         account: req.body.account,
@@ -276,10 +276,10 @@ export const replyAppointment = async (req, res) => {
       u_reply: req.body.u_reply,
       u_replyStatus: req.body.u_replyStatus
     }, { new: true })
-    req.user.reply.push({
-      u_id: req.user._id,
-      reply: req.body.u_reply
-    })
+    await users.findByIdAndUpdate({ _id: req.body.p_id }, {
+      $push: { reply: { u_id: req.user._id, reply: req.body.u_reply } }
+    }, { new: true })
+
     await req.user.save()
     if (!result) {
       res.status(404).json({ success: false, message: '找不到預約' })
